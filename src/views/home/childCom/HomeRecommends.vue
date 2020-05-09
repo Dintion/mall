@@ -24,7 +24,7 @@
     text-align: center;
     display: flex;
     margin-top: 10px;
-
+font-size: 0.8rem;
     border-bottom: 30px solid #f6f6f6;
   }
 
