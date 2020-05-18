@@ -26,7 +26,6 @@
     computed:{
       isActive(){
         if (this.$route.path === '/') {
-
         }
         return this.$route.path.indexOf(this.path) !== -1;
       }
