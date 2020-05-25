@@ -1,5 +1,5 @@
 <template>
-  <div class="goods">
+  <div class="goods" @click="goodClick">
     <img :src="good.show.img" alt="" @load="imageLoaded">
     <div class="goods-info">
       <p>{{good.title}}</p>
@@ -18,9 +18,12 @@
         type: Object,
         default: ''
       }
-    },methods:{
+    }, methods: {
       imageLoaded() {
         this.$bus.$emit('imageLoaded')
+      },
+      goodClick() {
+        this.$router.push('detail/' + this.good.iid)
       }
     }
   }
@@ -34,6 +37,7 @@
     padding-right: 5px;
     width: 47%;
   }
+
   .goods img {
     width: 100%;
     border-radius: 9px;
@@ -45,7 +49,7 @@
     bottom: 5px;
     left: 0;
     right: 0;
-    overflow:hidden;
+    overflow: hidden;
     text-align: center;
   }
 

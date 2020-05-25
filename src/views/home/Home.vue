@@ -3,16 +3,18 @@
     <nav-bar class="home-nav-bar">
       <div slot="center">购物街</div>
     </nav-bar>
+    <tab-control :titles="titles" class="showshow" @controlClick="controlItem" ref="tabControl1"
+                 v-show="isTabShow"></tab-control>
     <scroll class="content"
             ref="scroll"
             :probe="3"
             @scroll="controlBackTop"
             @pullingUp="upLoad"
             :pullLoad="true">
-      <home-swiper :banners="banners"/>
+      <home-swiper :banners="banners" @swiperLoaded="swiperLoaded"/>
       <home-recommends :recommends="recommends"/>
       <fashion/>
-      <tab-control :titles="titles" @controlClick="controlItem"></tab-control>
+      <tab-control :titles="titles" @controlClick="controlItem" ref="tabControl2"></tab-control>
       <goods-list :list="showGood"></goods-list>
     </scroll>
     <back-top @click.native="backTop" v-show="backTopShow"/>
@@ -32,6 +34,7 @@
   import BackTop from "components/content/backTop/BackTop";
 
   import {getMultiData, getHomeGoods} from "network/home";
+  import {debounce} from "../../common/utils/debounce";
 
 
   export default {
@@ -69,7 +72,10 @@
         },
         currentType: 'pop',
         probe: 3,
-        backTopShow: false
+        backTopShow: false,
+        tabControlOffsetTop: 0,
+        isTabShow: false,
+        scrollPosition: 0,
       }
     },
     created() {
@@ -77,14 +83,28 @@
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
-
     },
     methods: {
+      swiperLoaded() {
+        this.tabControlOffsetTop = this.$refs.tabControl2.$el.offsetTop
+      }
+      ,
       backTop() {
         this.$refs.scroll.scrollTo(0, 0, 500);
       },
-      controlBackTop(positon) {
-        this.backTopShow = -positon.y > 1000;
+      controlBackTop(position) {
+        /**
+         * 控制返回顶部
+         * @type {boolean}
+         */
+        this.backTopShow = -position.y > 1000;
+        /**
+         * 控制tabcontrol
+         */
+        this.isTabShow = -position.y > this.tabControlOffsetTop;
+        /**
+         * 记录位置
+         * */
       },
       /**
        * 获取数据
@@ -99,9 +119,9 @@
         const page = this.goods[type].page;
         getHomeGoods(type, page).then(res => {
           this.goods[type].list.push(...res.data.list)
+          this.goods[type].page += 1;
           this.$refs.scroll.pullUpFinsh();
         });
-        this.goods[type].page += 1;
       },
       controlItem(index) {
         if (index === 0) {
@@ -111,20 +131,13 @@
         } else {
           this.currentType = 'sell';
         }
+        this.$refs.tabControl1.currentIndex = index
+        this.$refs.tabControl2.currentIndex = index
       },
       upLoad() {
         this.getHomeGoods(this.currentType)
         this.$refs.scroll.refresh();
       },
-      debounce(func, delay) {
-        let timer = null;
-        return function (...args) {
-          if (timer) clearTimeout(timer);
-          timer = setTimeout(()=>{
-            func.apply(this,args)
-          },delay)
-        };
-      }
     },
     computed: {
       showGood() {
@@ -132,13 +145,20 @@
       }
     },
     mounted() {
-      const refresh = this.debounce(this.$refs.scroll.refresh,50)
+      const refresh = debounce(this.$refs.scroll.refresh, 50)
       this.$bus.$on('imageLoaded', () => {
         refresh();
       });
+    },
+    activated() {
+      console.log(this.scrollPosition)
+      this.$refs.scroll.refresh
+      this.$refs.scroll.scrollTo(0, this.scrollPosition, 0)
+    },
+    deactivated() {
+      this.scrollPosition = this.$refs.scroll.scroll.y;
     }
   }
-
 </script>
 
 <style scoped>
@@ -154,17 +174,15 @@
     font-size: 1.2rem;
   }
 
-  .tab-control {
-    position: sticky;
-    top: 44px;
-    z-index: 99;
-
-  }
-
   .content {
     overflow: hidden;
     position: absolute;
-    top: 44px;
+    top: 43px;
     bottom: 49px;
+  }
+
+  .showshow {
+    position: relative;
+    z-index: 10;
   }
 </style>

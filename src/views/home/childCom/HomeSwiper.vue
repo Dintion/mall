@@ -2,7 +2,7 @@
   <div>
     <swiper>
       <swiper-item v-for="item in banners">
-          <img :src="item.image" alt="">
+        <img :src="item.image" alt="" @load="swiperLoded">
       </swiper-item>
     </swiper>
   </div>
@@ -15,7 +15,7 @@
 
   export default {
     name: "HomeSwiper",
-    components:{
+    components: {
       SwiperItem,
       Swiper
     },
@@ -24,6 +24,20 @@
         default() {
           return []
         }
+      }
+    },
+    data() {
+      return {
+        isFinsh:false
+      }
+    },
+    methods: {
+      swiperLoded() {
+        if (!this.isFinsh) {
+          this.$emit('swiperLoaded');
+        }
+        this.isFinsh = true;
+
       }
     }
   }
