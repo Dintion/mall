@@ -1,5 +1,5 @@
 <template>
-  <nav-bar>
+  <nav-bar class="detail-navbar">
     <div slot="left">
       <img src="~assets/img/common/back.svg" alt="" class="back" @click="back">
     </div>
@@ -28,6 +28,7 @@
     methods: {
       itemClick(index) {
         this.currentIndex = index;
+        this.$emit('clickIndex',index)
       },
       back() {
         this.$router.back()
@@ -50,5 +51,8 @@
   }
   .back{
     margin-top: 12px;
+  }
+  .detail-navbar{
+    background-color: white;
   }
 </style>

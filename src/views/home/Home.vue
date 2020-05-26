@@ -31,10 +31,9 @@
   import TabControl from "components/common/tabcontrol/TabControl";
   import GoodsList from "components/content/goods/GoodsList";
   import Scroll from "components/common/scroll/Scroll";
-  import BackTop from "components/content/backTop/BackTop";
 
   import {getMultiData, getHomeGoods} from "network/home";
-  import {debounce} from "../../common/utils/debounce";
+  import {itemLoadListener,backTopMixin} from "../../common/mixin";
 
 
   export default {
@@ -47,7 +46,6 @@
       TabControl,
       GoodsList,
       Scroll,
-      BackTop,
     },
     data() {
       return {
@@ -72,7 +70,6 @@
         },
         currentType: 'pop',
         probe: 3,
-        backTopShow: false,
         tabControlOffsetTop: 0,
         isTabShow: false,
         scrollPosition: 0,
@@ -89,15 +86,12 @@
         this.tabControlOffsetTop = this.$refs.tabControl2.$el.offsetTop
       }
       ,
-      backTop() {
-        this.$refs.scroll.scrollTo(0, 0, 500);
-      },
       controlBackTop(position) {
         /**
          * 控制返回顶部
          * @type {boolean}
          */
-        this.backTopShow = -position.y > 1000;
+        this.backTopShow = -position.y > 800;
         /**
          * 控制tabcontrol
          */
@@ -138,6 +132,7 @@
         this.getHomeGoods(this.currentType)
         this.$refs.scroll.refresh();
       },
+
     },
     computed: {
       showGood() {
@@ -145,25 +140,24 @@
       }
     },
     mounted() {
-      const refresh = debounce(this.$refs.scroll.refresh, 50)
-      this.$bus.$on('imageLoaded', () => {
-        refresh();
-      });
     },
     activated() {
-      console.log(this.scrollPosition)
-      this.$refs.scroll.refresh
       this.$refs.scroll.scrollTo(0, this.scrollPosition, 0)
+      this.$refs.scroll.refresh
+
     },
     deactivated() {
       this.scrollPosition = this.$refs.scroll.scroll.y;
-    }
+      this.$bus.$off('imageLoaded', this.newrefresh)
+    },
+
+    mixins: [itemLoadListener, backTopMixin],
+
   }
 </script>
 
 <style scoped>
   #home {
-    padding-top: 44px;
     height: 100vh;
     position: relative;
   }
@@ -183,6 +177,7 @@
 
   .showshow {
     position: relative;
+   top: -2px;
     z-index: 10;
   }
 </style>

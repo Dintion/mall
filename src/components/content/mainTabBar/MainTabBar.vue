@@ -1,8 +1,6 @@
 <template>
   <div>
-    <keep-alive>
-    <router-view></router-view>
-    </keep-alive>
+
     <tab-bar>
       <tab-bar-item slot="default" path="/home">
         <img src="~assets/img/tabbar/home.svg" alt="首页" slot="item-icon">
